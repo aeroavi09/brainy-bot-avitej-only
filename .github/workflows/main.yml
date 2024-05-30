@@ -1,0 +1,35 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - testing-workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Copy JavaScript file and index and css to publish_dir
+        run: |
+          mkdir -p publish_dir  # Ensure publish_dir exists
+          cp ./study.js publish_dir/study.js  
+          cp ./study.html publish_dir/study.html
+          cp ./study.css publish_dir/study.css
+
+      - name: check the secrets
+        env:
+          SECRET_CONTEXT: ${{ toJson(github) }}
+        run: echo "$SECRET_CONTEXT"
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: publish_dir  # Root directory containing index.html and other static files
+      
